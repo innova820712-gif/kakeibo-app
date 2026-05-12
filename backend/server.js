@@ -74,7 +74,7 @@ app.post("/api/parse-receipt", async (req, res) => {
 
     // Claude API を呼び出す(ビジョン機能で画像を渡す)
     const response = await anthropic.messages.create({
-      model: "claude-haiku-4-5",
+      model: "claude-sonnet-4-5",
       max_tokens: 1500,
       messages: [
         {
