@@ -5,6 +5,7 @@ import UploadForm from "./components/upload-form.jsx";
 import ReceiptList from "./components/receipt-list.jsx";
 import CategoryPieChart from "./components/category-pie-chart.jsx";
 import MonthlyBarChart from "./components/monthly-bar-chart.jsx";
+import CategoryTable from "./components/category-table.jsx";
 import { loadReceipts, saveReceipts } from "./utils/storage.js";
 import { resolveCategory } from "./utils/category.js";
 import { validateReceipt, getReceiptTotal } from "./utils/validation.js";
@@ -80,6 +81,18 @@ export default function App() {
     setReceipts((prev) => prev.filter((r) => r.id !== id));
   };
 
+  // 全データを削除する(取り消し不可なので二重で確認)
+  const handleResetAll = () => {
+    if (receipts.length === 0) {
+      window.alert("削除する領収書はありません。");
+      return;
+    }
+    const msg = `登録されている領収書(${receipts.length} 件)をすべて削除します。\nこの操作は取り消せません。本当にリセットしますか?`;
+    if (!window.confirm(msg)) return;
+    setReceipts([]);
+    setPending(null);
+  };
+
   // 全データの合計金額(レシート記載の total を優先して合算)
   const grandTotal = receipts.reduce((acc, r) => acc + getReceiptTotal(r), 0);
 
@@ -133,6 +146,7 @@ export default function App() {
           <CategoryPieChart receipts={receipts} />
           <MonthlyBarChart receipts={receipts} />
         </div>
+        <CategoryTable receipts={receipts} />
       </section>
 
       <section className="card">
@@ -141,6 +155,13 @@ export default function App() {
 
       <footer className="app-footer">
         <small>データはこのブラウザの中だけに保存されます。</small>
+        <button
+          type="button"
+          className="reset-button"
+          onClick={handleResetAll}
+        >
+          全データをリセット
+        </button>
       </footer>
     </div>
   );

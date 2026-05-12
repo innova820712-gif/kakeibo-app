@@ -273,4 +273,80 @@ h3 {
   text-align: center;
   margin-top: 24px;
   color: #999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* 全データリセットボタン(誤クリック防止のため控えめに) */
+.reset-button {
+  background: transparent;
+  border: 1px solid #d0d0d0;
+  color: #888;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.reset-button:hover {
+  background: #fbecec;
+  border-color: #e6a5a5;
+  color: #c0392b;
+}
+
+/* カテゴリ別合計の表 */
+.category-table-block {
+  margin-top: 20px;
+  border-top: 1px solid #eee;
+  padding-top: 16px;
+}
+
+.category-table-block h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  color: #444;
+}
+
+.category-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.category-table th,
+.category-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.category-table th {
+  color: #666;
+  font-weight: normal;
+  font-size: 13px;
+}
+
+.category-table th.num,
+.category-table td.num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.category-table tfoot td {
+  font-weight: bold;
+  border-bottom: none;
+  border-top: 2px solid #ddd;
+  background: #fafbfc;
+}
+
+.cat-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
 }
