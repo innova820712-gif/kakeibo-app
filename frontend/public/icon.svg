@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- 青の角丸背景 -->
+  <rect width="512" height="512" rx="96" fill="#2563eb"/>
+  <!-- 中央に「領」を白で配置 -->
+  <text
+    x="256"
+    y="278"
+    fill="white"
+    font-family="'Hiragino Sans', 'Yu Gothic', 'Meiryo', 'Noto Sans CJK JP', 'PingFang SC', sans-serif"
+    font-size="320"
+    font-weight="700"
+    text-anchor="middle"
+    dominant-baseline="middle"
+  >領</text>
+</svg>
