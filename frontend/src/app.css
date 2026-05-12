@@ -77,16 +77,17 @@ body {
   margin: 16px 0;
 }
 
-.month-nav {
+.sidebar-nav {
   flex: 1;
   overflow-y: auto;
 }
 
-.month-item {
+/* 外側のアコーディオン: カテゴリ */
+.cat-item {
   border-bottom: 1px solid #f1f2f4;
 }
 
-.month-toggle {
+.cat-toggle {
   width: 100%;
   display: flex;
   justify-content: space-between;
@@ -101,11 +102,11 @@ body {
   text-align: left;
 }
 
-.month-toggle:hover {
+.cat-toggle:hover {
   background: #f7f9fc;
 }
 
-.month-label {
+.cat-label {
   display: flex;
   align-items: center;
   font-weight: 600;
@@ -118,28 +119,29 @@ body {
   color: #888;
 }
 
-.month-amount {
+.cat-amount {
   font-size: 12px;
   color: #666;
 }
 
-.category-list {
+/* 内側のリスト: 月別 */
+.month-list {
   list-style: none;
-  padding: 0 0 8px 22px;
+  padding: 0 0 8px 32px;
   margin: 0;
 }
 
-.category-list li {
+.month-list li {
   margin: 2px 0;
 }
 
-.category-empty {
+.month-empty {
   color: #aaa;
   font-size: 12px;
   padding: 4px 0;
 }
 
-.category-btn {
+.month-btn {
   width: 100%;
   display: flex;
   justify-content: space-between;
@@ -155,23 +157,23 @@ body {
   text-align: left;
 }
 
-.category-btn:hover {
+.month-btn:hover {
   background: #f3f6fb;
 }
 
-.category-btn.active {
+.month-btn.active {
   background: #eef3fb;
   border-color: #cdd9ec;
   color: #2a6ec1;
   font-weight: 600;
 }
 
-.cat-name {
+.month-name {
   display: flex;
   align-items: center;
 }
 
-.cat-amount {
+.month-amt {
   font-size: 12px;
   color: #666;
 }

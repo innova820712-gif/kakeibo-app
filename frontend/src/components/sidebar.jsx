@@ -1,6 +1,6 @@
-// 左サイドバー: 月別ナビゲーション
-// - 月をクリックでアコーディオン展開し、その月のカテゴリ別金額を表示
-// - カテゴリをクリックでメイン画面の明細リストを「その月+そのカテゴリ」に絞り込み
+// 左サイドバー: カテゴリ別経費ナビゲーション
+// - カテゴリをクリックでアコーディオン展開し、そのカテゴリの月別内訳を表示
+// - 月をクリックでメイン画面の明細リストを「そのカテゴリ+その月」で絞り込み
 // - サイドバー下部に総合計(全期間)を表示
 // - モバイル(<=768px)ではハンバーガーメニューで開閉
 import { useMemo } from "react";
@@ -8,6 +8,7 @@ import {
   CATEGORIES,
   sumByCategory,
   countByCategory,
+  sumByCategoryAndMonth,
 } from "../utils/category.js";
 import { getReceiptTotal } from "../utils/validation.js";
 
@@ -23,22 +24,30 @@ export default function Sidebar({
   receipts,
   filter,
   onSelectFilter,
-  expandedMonth,
-  onToggleMonth,
+  expandedCategory,
+  onToggleCategory,
   isOpenMobile,
   onCloseMobile,
 }) {
-  // 月のリストを「日付ありを降順 + 日付不明を末尾」で生成
-  const months = useMemo(() => {
-    const set = new Set();
-    for (const r of receipts) {
-      const d = r.date || "";
-      set.add(d.length >= 7 ? d.slice(0, 7) : "不明");
-    }
-    const dated = [...set].filter((m) => m !== "不明").sort().reverse();
-    const undated = set.has("不明") ? ["不明"] : [];
-    return [...dated, ...undated];
+  // カテゴリの合計金額・件数(件数 0 を除き、金額の多い順)
+  const visibleCategories = useMemo(() => {
+    const totals = sumByCategory(receipts);
+    const counts = countByCategory(receipts);
+    return CATEGORIES.map((c) => ({
+      key: c.key,
+      color: c.color,
+      count: counts[c.key] || 0,
+      total: totals[c.key] || 0,
+    }))
+      .filter((c) => c.count > 0)
+      .sort((a, b) => b.total - a.total);
   }, [receipts]);
+
+  // カテゴリ × 年月の集計マップ
+  const monthlyByCategory = useMemo(
+    () => sumByCategoryAndMonth(receipts),
+    [receipts]
+  );
 
   // 総合計(全期間)
   const grandTotalAll = useMemo(
@@ -46,14 +55,14 @@ export default function Sidebar({
     [receipts]
   );
 
-  // フィルタが立っている月は強制的に展開して見せる
-  const visiblyExpandedMonth = filter ? filter.month : expandedMonth;
+  // フィルタが立っているカテゴリは強制的に展開して見せる
+  const visiblyExpandedCategory = filter ? filter.category : expandedCategory;
 
   return (
     <>
       <aside className={`sidebar ${isOpenMobile ? "open" : ""}`}>
         <div className="sidebar-header">
-          <h2>📊 月別ナビゲーション</h2>
+          <h2>📂 カテゴリ別経費</h2>
           <button
             type="button"
             className="sidebar-close"
@@ -64,30 +73,34 @@ export default function Sidebar({
           </button>
         </div>
 
-        {months.length === 0 ? (
+        {visibleCategories.length === 0 ? (
           <p className="sidebar-empty">領収書がまだありません</p>
         ) : (
-          <nav className="month-nav">
-            {months.map((month) => {
-              // 「不明」月は date 先頭一致がうまく効かないので、別途フィルタを用意
-              const monthReceipts = receipts.filter((r) => {
-                const d = r.date || "";
-                if (month === "不明") return d.length < 7;
-                return d.startsWith(month);
-              });
-              const expanded = visiblyExpandedMonth === month;
-              const activeCategory =
-                filter && filter.month === month ? filter.category : null;
+          <nav className="sidebar-nav">
+            {visibleCategories.map((c) => {
+              // このカテゴリの月別合計(0 円は除外、日付ありを降順 + 不明を末尾)
+              const monthMap = monthlyByCategory[c.key] || {};
+              const monthEntries = Object.entries(monthMap)
+                .filter(([, amt]) => amt > 0)
+                .sort(([a], [b]) => {
+                  if (a === "不明") return 1;
+                  if (b === "不明") return -1;
+                  return b.localeCompare(a);
+                });
+
+              const expanded = visiblyExpandedCategory === c.key;
+              const activeMonth =
+                filter && filter.category === c.key ? filter.month : null;
+
               return (
-                <MonthAccordion
-                  key={month}
-                  month={month}
-                  monthLabel={formatMonthLabel(month)}
-                  monthReceipts={monthReceipts}
+                <CategoryAccordion
+                  key={c.key}
+                  category={c}
+                  monthEntries={monthEntries}
                   expanded={expanded}
-                  onToggle={() => onToggleMonth(month)}
-                  activeCategory={activeCategory}
-                  onSelectCategory={(cat) => onSelectFilter(month, cat)}
+                  onToggle={() => onToggleCategory(c.key)}
+                  activeMonth={activeMonth}
+                  onSelectMonth={(ym) => onSelectFilter(ym, c.key)}
                 />
               );
             })}
@@ -112,80 +125,59 @@ export default function Sidebar({
   );
 }
 
-// 月の見出しと、展開時に表示するカテゴリ別合計のリスト
-function MonthAccordion({
-  monthLabel,
-  monthReceipts,
+// カテゴリの見出しと、展開時に表示する月別内訳のリスト
+function CategoryAccordion({
+  category,
+  monthEntries,
   expanded,
   onToggle,
-  activeCategory,
-  onSelectCategory,
+  activeMonth,
+  onSelectMonth,
 }) {
-  const monthTotal = monthReceipts.reduce(
-    (acc, r) => acc + getReceiptTotal(r),
-    0
-  );
-
-  const totals = sumByCategory(monthReceipts);
-  const counts = countByCategory(monthReceipts);
-
-  // 件数 0 のカテゴリは表示しない、合計金額の多い順
-  const rows = CATEGORIES.map((c) => ({
-    key: c.key,
-    color: c.color,
-    count: counts[c.key] || 0,
-    total: totals[c.key] || 0,
-  }))
-    .filter((r) => r.count > 0)
-    .sort((a, b) => b.total - a.total);
-
   return (
-    <div className={`month-item ${expanded ? "expanded" : ""}`}>
+    <div className={`cat-item ${expanded ? "expanded" : ""}`}>
       <button
         type="button"
-        className="month-toggle"
+        className="cat-toggle"
         onClick={onToggle}
         aria-expanded={expanded}
       >
-        <span className="month-label">
+        <span className="cat-label">
           <span className="caret" aria-hidden="true">
             {expanded ? "▼" : "▶"}
           </span>
-          {monthLabel}
+          <span
+            className="cat-dot"
+            style={{ background: category.color }}
+            aria-hidden="true"
+          />
+          {category.key}
         </span>
-        <span className="month-amount">{monthTotal.toLocaleString()} 円</span>
+        <span className="cat-amount">{category.total.toLocaleString()} 円</span>
       </button>
 
       {expanded && (
-        <ul className="category-list">
-          {rows.length === 0 && (
-            <li className="category-empty">カテゴリデータなし</li>
+        <ul className="month-list">
+          {monthEntries.length === 0 ? (
+            <li className="month-empty">データなし</li>
+          ) : (
+            monthEntries.map(([ym, amt]) => {
+              const isActive = activeMonth === ym;
+              return (
+                <li key={ym}>
+                  <button
+                    type="button"
+                    className={`month-btn ${isActive ? "active" : ""}`}
+                    onClick={() => onSelectMonth(ym)}
+                    aria-pressed={isActive}
+                  >
+                    <span className="month-name">{formatMonthLabel(ym)}</span>
+                    <span className="month-amt">{amt.toLocaleString()} 円</span>
+                  </button>
+                </li>
+              );
+            })
           )}
-          {rows.map((r) => {
-            const isActive = activeCategory === r.key;
-            return (
-              <li key={r.key}>
-                <button
-                  type="button"
-                  className={`category-btn ${isActive ? "active" : ""}`}
-                  onClick={() => onSelectCategory(r.key)}
-                  aria-pressed={isActive}
-                >
-                  <span className="cat-name">
-                    <span
-                      className="cat-dot"
-                      style={{ background: r.color }}
-                      aria-hidden="true"
-                    />
-                    {r.key}
-                  </span>
-                  <span className="cat-amount">
-                    {r.total.toLocaleString()} 円
-                  </span>
-                </button>
-              </li>
-            );
-          })}
         </ul>
       )}
     </div>

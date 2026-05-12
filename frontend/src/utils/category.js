@@ -110,6 +110,24 @@ export function countByCategory(receipts) {
   return counts;
 }
 
+// 領収書配列を「カテゴリ × 年月」で集計する
+// 戻り値: { 接待交際費: { "2026-05": 3000, "2026-04": 2000 }, 交通費: {...} }
+export function sumByCategoryAndMonth(receipts) {
+  const map = {};
+  for (const c of CATEGORIES) map[c.key] = {};
+
+  for (const r of receipts) {
+    const d = r.date || "";
+    const ym = d.length >= 7 ? d.slice(0, 7) : "不明";
+    for (const item of r.items || []) {
+      const cat = item.category || "その他";
+      const key = Object.prototype.hasOwnProperty.call(map, cat) ? cat : "その他";
+      map[key][ym] = (map[key][ym] || 0) + Number(item.price || 0);
+    }
+  }
+  return map;
+}
+
 // 領収書配列から「年月別」の合計金額を集計する
 // 戻り値: { "2026-05": 12000, "2026-04": 8000, ... } を月昇順で
 // 各領収書の合計は receipt.total を優先(無ければ items の合計)

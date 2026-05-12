@@ -20,8 +20,8 @@ export default function App() {
   // 検証で警告が出た領収書を一時保留する状態
   const [pending, setPending] = useState(null);
 
-  // サイドバー: アコーディオン展開中の月("YYYY-MM" もしくは null)
-  const [expandedMonth, setExpandedMonth] = useState(null);
+  // サイドバー: アコーディオン展開中のカテゴリ名 もしくは null
+  const [expandedCategory, setExpandedCategory] = useState(null);
 
   // メイン画面の絞り込み: { month: "YYYY-MM", category: "..." } もしくは null
   const [filter, setFilter] = useState(null);
@@ -105,15 +105,15 @@ export default function App() {
     setReceipts([]);
     setPending(null);
     setFilter(null);
-    setExpandedMonth(null);
+    setExpandedCategory(null);
   };
 
-  // サイドバー: 月の展開/折り畳み(同じ月をクリックで閉じる)
-  const handleToggleMonth = (month) => {
-    setExpandedMonth((prev) => (prev === month ? null : month));
+  // サイドバー: カテゴリの展開/折り畳み(同じカテゴリをクリックで閉じる)
+  const handleToggleCategory = (category) => {
+    setExpandedCategory((prev) => (prev === category ? null : category));
   };
 
-  // サイドバー: カテゴリ選択(同じ組み合わせをもう一度押すと絞り込み解除)
+  // サイドバー: 月選択(同じ組み合わせをもう一度押すと絞り込み解除)
   const handleSelectFilter = (month, category) => {
     setFilter((prev) =>
       prev && prev.month === month && prev.category === category
@@ -155,8 +155,8 @@ export default function App() {
         receipts={receipts}
         filter={filter}
         onSelectFilter={handleSelectFilter}
-        expandedMonth={expandedMonth}
-        onToggleMonth={handleToggleMonth}
+        expandedCategory={expandedCategory}
+        onToggleCategory={handleToggleCategory}
         isOpenMobile={sidebarOpen}
         onCloseMobile={() => setSidebarOpen(false)}
       />
