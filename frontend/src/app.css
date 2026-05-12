@@ -1,0 +1,223 @@
+/* アプリ全体のスタイル */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+  background: #f4f6f8;
+  color: #222;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 28px;
+  color: #2a6ec1;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+h3 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  color: #444;
+}
+
+/* アップロードフォーム */
+.upload-form input[type="file"] {
+  display: block;
+  margin: 12px 0;
+}
+
+.upload-form .preview {
+  margin: 12px 0;
+}
+
+.upload-form .preview img {
+  max-width: 100%;
+  max-height: 280px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.primary-button {
+  background: #2a6ec1;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.primary-button:hover:not(:disabled) {
+  background: #1f5aa1;
+}
+
+.primary-button:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #c0392b;
+  margin-top: 8px;
+}
+
+/* サマリー */
+.summary {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 8px 0 16px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #555;
+}
+
+/* グラフ並び */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 720px) {
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-block {
+  background: #fafbfc;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.empty-small {
+  color: #999;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* レシート一覧 */
+.receipt-card {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+
+.receipt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.store {
+  color: #666;
+  margin-left: 8px;
+  font-size: 14px;
+}
+
+.delete-button {
+  background: transparent;
+  border: 1px solid #d0d0d0;
+  color: #777;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.delete-button:hover {
+  background: #fbecec;
+  border-color: #e6a5a5;
+  color: #c0392b;
+}
+
+.items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.items-table th,
+.items-table td {
+  text-align: left;
+  padding: 6px 4px;
+  border-bottom: 1px dashed #eee;
+}
+
+.items-table th {
+  color: #888;
+  font-weight: normal;
+  font-size: 12px;
+}
+
+.items-table .price {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.items-table tfoot td {
+  font-weight: bold;
+  border-bottom: none;
+  border-top: 2px solid #ddd;
+}
+
+.badge {
+  display: inline-block;
+  background: #eef3fb;
+  color: #2a6ec1;
+  border-radius: 4px;
+  padding: 1px 8px;
+  font-size: 12px;
+}
+
+.empty {
+  text-align: center;
+  color: #888;
+  padding: 16px 0;
+}
+
+.app-footer {
+  text-align: center;
+  margin-top: 24px;
+  color: #999;
+}
