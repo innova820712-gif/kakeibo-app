@@ -1,12 +1,14 @@
 // 登録済み領収書の一覧表示コンポーネント
 // 日付の新しい順に並べて表示し、削除ボタンも提供する
+// 明細のカテゴリはプルダウンで手動変更可能
 import {
   calcItemsTotal,
   getReceiptTotal,
   hasTotalDiff,
 } from "../utils/validation.js";
+import { CATEGORIES } from "../utils/category.js";
 
-export default function ReceiptList({ receipts, onDelete }) {
+export default function ReceiptList({ receipts, onDelete, onChangeCategory }) {
   if (receipts.length === 0) {
     return (
       <div className="empty">
@@ -54,15 +56,43 @@ export default function ReceiptList({ receipts, onDelete }) {
                 </tr>
               </thead>
               <tbody>
-                {(r.items || []).map((item, idx) => (
-                  <tr key={idx}>
-                    <td>{item.name}</td>
-                    <td>
-                      <span className="badge">{item.category || "その他"}</span>
-                    </td>
-                    <td className="price">{Number(item.price || 0).toLocaleString()} 円</td>
-                  </tr>
-                ))}
+                {(r.items || []).map((item, idx) => {
+                  const currentCategory = item.category || "その他";
+                  // 既知の8カテゴリに無い値(古いデータなど)はプルダウンに
+                  // 同名のオプションを足して、選び直せるようにする
+                  const isUnknownCategory = !CATEGORIES.some(
+                    (c) => c.key === currentCategory
+                  );
+                  return (
+                    <tr key={idx}>
+                      <td>{item.name}</td>
+                      <td>
+                        <select
+                          className="category-select"
+                          value={currentCategory}
+                          onChange={(e) =>
+                            onChangeCategory(r.id, idx, e.target.value)
+                          }
+                          aria-label="カテゴリを変更"
+                        >
+                          {isUnknownCategory && (
+                            <option value={currentCategory}>
+                              {currentCategory}(旧)
+                            </option>
+                          )}
+                          {CATEGORIES.map((c) => (
+                            <option key={c.key} value={c.key}>
+                              {c.key}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="price">
+                        {Number(item.price || 0).toLocaleString()} 円
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
               <tfoot>
                 {showBreakdown && (

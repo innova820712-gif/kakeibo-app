@@ -81,6 +81,19 @@ export default function App() {
     setReceipts((prev) => prev.filter((r) => r.id !== id));
   };
 
+  // 明細のカテゴリを手動で変更する(変更は useEffect 経由で localStorage に自動保存される)
+  const handleChangeCategory = (receiptId, itemIndex, newCategory) => {
+    setReceipts((prev) =>
+      prev.map((r) => {
+        if (r.id !== receiptId) return r;
+        const newItems = (r.items || []).map((it, idx) =>
+          idx === itemIndex ? { ...it, category: newCategory } : it
+        );
+        return { ...r, items: newItems };
+      })
+    );
+  };
+
   // 全データを削除する(取り消し不可なので二重で確認)
   const handleResetAll = () => {
     if (receipts.length === 0) {
@@ -150,7 +163,11 @@ export default function App() {
       </section>
 
       <section className="card">
-        <ReceiptList receipts={receipts} onDelete={handleDelete} />
+        <ReceiptList
+          receipts={receipts}
+          onDelete={handleDelete}
+          onChangeCategory={handleChangeCategory}
+        />
       </section>
 
       <footer className="app-footer">

@@ -263,6 +263,27 @@ h3 {
   font-size: 12px;
 }
 
+/* 明細のカテゴリ変更プルダウン */
+.category-select {
+  background: #eef3fb;
+  color: #2a6ec1;
+  border: 1px solid #cdd9ec;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.category-select:hover {
+  border-color: #2a6ec1;
+}
+
+.category-select:focus {
+  outline: 2px solid #2a6ec1;
+  outline-offset: 1px;
+}
+
 .empty {
   text-align: center;
   color: #888;
