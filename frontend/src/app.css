@@ -239,6 +239,21 @@ h3 {
   border-top: 2px solid #ddd;
 }
 
+/* 商品計と差額行は補足情報なので控えめに表示 */
+.items-table tfoot .subtotal-row td,
+.items-table tfoot .diff-row td {
+  font-weight: normal;
+  border-top: none;
+  color: #888;
+  font-size: 13px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.items-table tfoot .subtotal-row td {
+  padding-top: 8px;
+}
+
 .badge {
   display: inline-block;
   background: #eef3fb;

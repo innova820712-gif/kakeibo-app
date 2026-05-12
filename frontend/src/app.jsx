@@ -7,7 +7,7 @@ import CategoryPieChart from "./components/category-pie-chart.jsx";
 import MonthlyBarChart from "./components/monthly-bar-chart.jsx";
 import { loadReceipts, saveReceipts } from "./utils/storage.js";
 import { detectCategory } from "./utils/category.js";
-import { validateReceipt } from "./utils/validation.js";
+import { validateReceipt, getReceiptTotal } from "./utils/validation.js";
 
 export default function App() {
   // レシート一覧の状態
@@ -36,11 +36,16 @@ export default function App() {
       category: detectCategory(it.name),
     }));
 
+    // バックエンドが返した total を数値として正規化(unknown 等は null)
+    const totalNum = Number(parsed.total);
+    const normalizedTotal = Number.isFinite(totalNum) ? totalNum : null;
+
     const newReceipt = {
       // 一意な ID(日時 + 乱数)を付与
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       date: parsed.date || new Date().toISOString().slice(0, 10),
       store: parsed.store || "",
+      total: normalizedTotal,
       items: itemsWithCategory,
     };
 
@@ -74,12 +79,8 @@ export default function App() {
     setReceipts((prev) => prev.filter((r) => r.id !== id));
   };
 
-  // 全データの合計金額(参考表示用)
-  const grandTotal = receipts.reduce(
-    (acc, r) =>
-      acc + (r.items || []).reduce((a, it) => a + Number(it.price || 0), 0),
-    0
-  );
+  // 全データの合計金額(レシート記載の total を優先して合算)
+  const grandTotal = receipts.reduce((acc, r) => acc + getReceiptTotal(r), 0);
 
   return (
     <div className="container">

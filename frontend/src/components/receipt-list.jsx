@@ -1,5 +1,10 @@
 // 登録済みレシートの一覧表示コンポーネント
 // 日付の新しい順に並べて表示し、削除ボタンも提供する
+import {
+  calcItemsTotal,
+  getReceiptTotal,
+  hasTotalDiff,
+} from "../utils/validation.js";
 
 export default function ReceiptList({ receipts, onDelete }) {
   if (receipts.length === 0) {
@@ -19,10 +24,12 @@ export default function ReceiptList({ receipts, onDelete }) {
     <div className="receipt-list">
       <h2>登録したレシート</h2>
       {sorted.map((r) => {
-        const total = (r.items || []).reduce(
-          (acc, it) => acc + Number(it.price || 0),
-          0
-        );
+        // レシートに記載されていた合計(優先)と、商品行のみの合計
+        const total = getReceiptTotal(r);
+        const itemsTotal = calcItemsTotal(r);
+        const showBreakdown = hasTotalDiff(r);
+        const diff = total - itemsTotal;
+
         return (
           <div key={r.id} className="receipt-card">
             <div className="receipt-header">
@@ -58,6 +65,21 @@ export default function ReceiptList({ receipts, onDelete }) {
                 ))}
               </tbody>
               <tfoot>
+                {showBreakdown && (
+                  <>
+                    <tr className="subtotal-row">
+                      <td colSpan={2}>商品計</td>
+                      <td className="price">{itemsTotal.toLocaleString()} 円</td>
+                    </tr>
+                    <tr className="diff-row">
+                      <td colSpan={2}>差額(深夜料・サービス料・税など)</td>
+                      <td className="price">
+                        {diff >= 0 ? "+" : ""}
+                        {diff.toLocaleString()} 円
+                      </td>
+                    </tr>
+                  </>
+                )}
                 <tr>
                   <td colSpan={2}>合計</td>
                   <td className="price">{total.toLocaleString()} 円</td>

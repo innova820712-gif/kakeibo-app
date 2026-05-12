@@ -1,5 +1,6 @@
 // 商品名から「食費」「日用品」「外食」などのカテゴリを自動判定するユーティリティ
 // シンプルなキーワード一致で分類する
+import { getReceiptTotal } from "./validation.js";
 
 // カテゴリ一覧(円グラフの色もここで管理)
 export const CATEGORIES = [
@@ -76,12 +77,13 @@ export function sumByCategory(receipts) {
 
 // レシート配列から「年月別」の合計金額を集計する
 // 戻り値: { "2026-05": 12000, "2026-04": 8000, ... } を月昇順で
+// 各レシートの合計は receipt.total を優先(無ければ items の合計)
 export function sumByMonth(receipts) {
   const totals = {};
   for (const r of receipts) {
     const date = r.date || "";
     const ym = date.length >= 7 ? date.slice(0, 7) : "不明";
-    const sum = (r.items || []).reduce((acc, it) => acc + Number(it.price || 0), 0);
+    const sum = getReceiptTotal(r);
     totals[ym] = (totals[ym] || 0) + sum;
   }
 
