@@ -6,7 +6,7 @@ import ReceiptList from "./components/receipt-list.jsx";
 import CategoryPieChart from "./components/category-pie-chart.jsx";
 import MonthlyBarChart from "./components/monthly-bar-chart.jsx";
 import { loadReceipts, saveReceipts } from "./utils/storage.js";
-import { detectCategory } from "./utils/category.js";
+import { resolveCategory } from "./utils/category.js";
 import { validateReceipt, getReceiptTotal } from "./utils/validation.js";
 
 export default function App() {
@@ -29,11 +29,12 @@ export default function App() {
 
   // 解析結果を受け取って一覧に追加する(検証で問題があれば保留して確認する)
   const handleParsed = (parsed) => {
-    // 商品ごとにカテゴリを自動判定
+    // 明細ごとにカテゴリを決定(Claude が返したカテゴリを優先、
+    // 無効/未指定ならフロントエンドのキーワード判定にフォールバック)
     const itemsWithCategory = (parsed.items || []).map((it) => ({
       name: String(it.name || ""),
       price: Number(it.price || 0),
-      category: detectCategory(it.name),
+      category: resolveCategory(it.category, it.name),
     }));
 
     // バックエンドが返した total を数値として正規化(unknown 等は null)
@@ -73,9 +74,9 @@ export default function App() {
     setPending(null);
   };
 
-  // レシートを削除する
+  // 領収書を削除する
   const handleDelete = (id) => {
-    if (!window.confirm("このレシートを削除しますか?")) return;
+    if (!window.confirm("この領収書を削除しますか?")) return;
     setReceipts((prev) => prev.filter((r) => r.id !== id));
   };
 
@@ -85,8 +86,8 @@ export default function App() {
   return (
     <div className="container">
       <header className="app-header">
-        <h1>レシート家計簿</h1>
-        <p className="subtitle">レシートを撮って送るだけで、自動で家計簿に記録します。</p>
+        <h1>領収書スキャナー</h1>
+        <p className="subtitle">領収書を撮って送るだけで、自動で経費を記録します。</p>
       </header>
 
       <section className="card">

@@ -1,4 +1,4 @@
-// 登録済みレシートの一覧表示コンポーネント
+// 登録済み領収書の一覧表示コンポーネント
 // 日付の新しい順に並べて表示し、削除ボタンも提供する
 import {
   calcItemsTotal,
@@ -10,7 +10,7 @@ export default function ReceiptList({ receipts, onDelete }) {
   if (receipts.length === 0) {
     return (
       <div className="empty">
-        <p>まだレシートが登録されていません。</p>
+        <p>まだ領収書が登録されていません。</p>
       </div>
     );
   }
@@ -22,7 +22,7 @@ export default function ReceiptList({ receipts, onDelete }) {
 
   return (
     <div className="receipt-list">
-      <h2>登録したレシート</h2>
+      <h2>登録した領収書</h2>
       {sorted.map((r) => {
         // レシートに記載されていた合計(優先)と、商品行のみの合計
         const total = getReceiptTotal(r);

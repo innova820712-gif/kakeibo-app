@@ -1,53 +1,70 @@
-// 商品名から「食費」「日用品」「外食」などのカテゴリを自動判定するユーティリティ
-// シンプルなキーワード一致で分類する
+// 法人経費精算のカテゴリ定義とキーワード判定ユーティリティ
+// 各明細(item)を 8 カテゴリのいずれかに分類する。
+// バックエンドの Claude が category を返した場合はそれを優先し、
+// 無い場合のフォールバックとしてこのファイルのキーワード判定を使う。
 import { getReceiptTotal } from "./validation.js";
 
-// カテゴリ一覧(円グラフの色もここで管理)
+// カテゴリ一覧(円グラフ・表で使う色もここで管理)
+// 色は系統:青/オレンジ/緑/紫/水色/茶/グレー/薄いグレー
 export const CATEGORIES = [
-  { key: "食費", color: "#ef6c6c" },
-  { key: "外食", color: "#f3a35c" },
-  { key: "日用品", color: "#6ec6c6" },
-  { key: "飲料", color: "#8aa9e8" },
-  { key: "衣料品", color: "#b89edb" },
-  { key: "交通費", color: "#6dbf85" },
-  { key: "その他", color: "#bdbdbd" },
+  { key: "交通費", color: "#3b82f6" },     // 青系
+  { key: "接待交際費", color: "#f97316" }, // オレンジ系
+  { key: "会議費", color: "#10b981" },     // 緑系
+  { key: "消耗品費", color: "#a855f7" },   // 紫系
+  { key: "通信費", color: "#06b6d4" },     // 水色系
+  { key: "旅費", color: "#92400e" },       // 茶系
+  { key: "雑費", color: "#6b7280" },       // グレー系
+  { key: "その他", color: "#d1d5db" },     // 薄いグレー
 ];
 
 // キーワード辞書(商品名にこの単語が含まれていればそのカテゴリ)
+// 上から順に評価して最初に一致したものを採用するので、
+// 具体的な語(旅費・交通費)を上、汎用的な語(接待交際費)を下に置く。
 const CATEGORY_KEYWORDS = {
-  食費: [
-    "米", "パン", "肉", "豚", "牛", "鶏", "魚", "卵", "野菜", "キャベツ",
-    "玉ねぎ", "にんじん", "じゃがいも", "トマト", "きゅうり", "果物", "りんご",
-    "バナナ", "みかん", "牛乳", "ヨーグルト", "チーズ", "豆腐", "納豆",
-    "弁当", "おにぎり", "惣菜", "総菜", "サラダ", "醤油", "味噌", "塩",
-    "砂糖", "油", "麺", "うどん", "そば", "パスタ", "ラーメン",
-  ],
-  外食: [
-    "レストラン", "カフェ", "喫茶", "マクドナルド", "モスバーガー", "すき家",
-    "吉野家", "松屋", "スターバックス", "ドトール", "コメダ", "サイゼリヤ",
-    "ガスト", "デニーズ", "定食", "ランチセット",
-  ],
-  日用品: [
-    "ティッシュ", "トイレットペーパー", "洗剤", "シャンプー", "リンス",
-    "ボディソープ", "石鹸", "歯ブラシ", "歯磨き", "タオル", "ゴミ袋",
-    "ラップ", "アルミホイル", "電池", "乾電池", "マスク", "綿棒",
-  ],
-  飲料: [
-    "水", "ミネラルウォーター", "お茶", "緑茶", "麦茶", "紅茶", "コーヒー",
-    "ジュース", "コーラ", "ビール", "発泡酒", "ワイン", "日本酒", "焼酎",
-    "牛乳", "豆乳",
-  ],
-  衣料品: [
-    "シャツ", "Tシャツ", "ズボン", "パンツ", "スカート", "下着", "靴下",
-    "セーター", "ジャケット", "コート", "靴", "スニーカー", "帽子",
+  旅費: [
+    "ホテル", "宿泊", "旅館", "新幹線", "航空券", "飛行機",
+    "JAL", "ANA", "出張", "民宿", "ゲストハウス",
   ],
   交通費: [
-    "切符", "乗車券", "定期", "ICカード", "Suica", "PASMO", "タクシー",
-    "ガソリン", "駐車場",
+    "タクシー", "JR", "バス", "地下鉄", "電車", "切符", "乗車券",
+    "ガソリン", "駐車場", "高速", "ETC", "Suica", "PASMO",
+    "ICカード", "定期", "回数券",
+  ],
+  通信費: [
+    "携帯", "スマートフォン", "通信料", "回線", "インターネット",
+    "サーバー", "クラウド", "電話料金", "モバイル", "Wi-Fi",
+    "ドメイン", "ホスティング",
+  ],
+  消耗品費: [
+    "コピー用紙", "用紙", "文房具", "トナー", "インク",
+    "ボールペン", "ペン", "クリアファイル", "ノート", "クリップ",
+    "テープ", "ホチキス", "プリンタ", "封筒", "付箋",
+  ],
+  会議費: [
+    "会議室", "ケータリング", "弁当", "お茶", "お菓子",
+    "ペットボトル", "ミネラルウォーター", "おにぎり",
+  ],
+  接待交際費: [
+    "すき家", "吉野家", "松屋", "マクドナルド", "モスバーガー",
+    "スターバックス", "ドトール", "コメダ", "サイゼリヤ", "ガスト",
+    "デニーズ", "居酒屋", "レストラン", "カフェ", "喫茶",
+    "ビール", "焼肉", "寿司", "ラーメン", "飲食店", "食堂",
+    "バー", "ワイン", "日本酒", "焼酎", "コース料理", "定食",
   ],
 };
 
+// Claude が返したカテゴリが有効な 8 カテゴリのいずれかであれば採用し、
+// そうでなければ商品名からのキーワード判定にフォールバックする
+export function resolveCategory(aiCategory, itemName) {
+  if (typeof aiCategory === "string") {
+    const matched = CATEGORIES.find((c) => c.key === aiCategory);
+    if (matched) return matched.key;
+  }
+  return detectCategory(itemName);
+}
+
 // 商品名 1 件から最適なカテゴリを判定する
+// 一致するキーワードがなければ「その他」を返す
 export function detectCategory(itemName) {
   if (!itemName) return "その他";
   const name = String(itemName);
@@ -60,8 +77,8 @@ export function detectCategory(itemName) {
   return "その他";
 }
 
-// レシート配列からカテゴリ別の合計金額を集計する
-// 戻り値: { 食費: 1200, 日用品: 500, ... }
+// 領収書配列からカテゴリ別の合計金額を集計する
+// 戻り値: { 交通費: 1200, 接待交際費: 5000, ... }
 export function sumByCategory(receipts) {
   const totals = {};
   for (const c of CATEGORIES) totals[c.key] = 0;
@@ -69,15 +86,33 @@ export function sumByCategory(receipts) {
   for (const r of receipts) {
     for (const item of r.items || []) {
       const cat = item.category || "その他";
-      totals[cat] = (totals[cat] || 0) + Number(item.price || 0);
+      // 既知のカテゴリ以外が紛れていた場合は「その他」に寄せる
+      const key = Object.prototype.hasOwnProperty.call(totals, cat) ? cat : "その他";
+      totals[key] = totals[key] + Number(item.price || 0);
     }
   }
   return totals;
 }
 
-// レシート配列から「年月別」の合計金額を集計する
+// 領収書配列からカテゴリ別の明細件数を集計する
+// 戻り値: { 交通費: 3, 接待交際費: 5, ... }
+export function countByCategory(receipts) {
+  const counts = {};
+  for (const c of CATEGORIES) counts[c.key] = 0;
+
+  for (const r of receipts) {
+    for (const item of r.items || []) {
+      const cat = item.category || "その他";
+      const key = Object.prototype.hasOwnProperty.call(counts, cat) ? cat : "その他";
+      counts[key] = counts[key] + 1;
+    }
+  }
+  return counts;
+}
+
+// 領収書配列から「年月別」の合計金額を集計する
 // 戻り値: { "2026-05": 12000, "2026-04": 8000, ... } を月昇順で
-// 各レシートの合計は receipt.total を優先(無ければ items の合計)
+// 各領収書の合計は receipt.total を優先(無ければ items の合計)
 export function sumByMonth(receipts) {
   const totals = {};
   for (const r of receipts) {

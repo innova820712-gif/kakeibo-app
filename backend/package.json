@@ -1,7 +1,7 @@
 {
   "name": "kakeibo-backend",
   "version": "1.0.0",
-  "description": "レシート画像を Claude API で読み取るバックエンド",
+  "description": "領収書画像を Claude API で読み取るバックエンド(法人経費精算用)",
   "type": "module",
   "main": "server.js",
   "scripts": {

@@ -1,9 +1,9 @@
-// レシートの合計取得ヘルパーと検証ロジック
+// 領収書の合計取得ヘルパーと検証ロジック
 // 「合計」はバックエンドが返した receipt.total を優先し、
 // 数値として読めない(undefined や "unknown" など)場合のみ
-// 商品(items)の price 合計をフォールバックとして使う。
+// 明細(items)の price 合計をフォールバックとして使う。
 
-// 商品(items)の price だけを合算した金額を返す
+// 明細(items)の price だけを合算した金額を返す
 export function calcItemsTotal(receipt) {
   return (receipt?.items || []).reduce(
     (acc, it) => acc + Number(it.price || 0),
@@ -11,7 +11,7 @@ export function calcItemsTotal(receipt) {
   );
 }
 
-// レシートとして扱うべき「合計金額」を返す
+// 領収書として扱うべき「合計金額」を返す
 // receipt.total が数値で取れればそれを使い、無ければ items の合計にフォールバック
 export function getReceiptTotal(receipt) {
   const t = receipt?.total;
@@ -36,7 +36,7 @@ export function hasTotalDiff(receipt) {
 export function validateReceipt(newReceipt, existingReceipts) {
   const warnings = [];
 
-  // 1. 金額が負の値の商品を検出
+  // 1. 金額が負の値の明細を検出
   const negativeItems = (newReceipt.items || []).filter(
     (it) => Number(it.price) < 0
   );
@@ -44,10 +44,10 @@ export function validateReceipt(newReceipt, existingReceipts) {
     const names = negativeItems
       .map((it) => `「${it.name || "(名前なし)"}」(${Number(it.price).toLocaleString()} 円)`)
       .join("、");
-    warnings.push(`金額がマイナスの商品があります: ${names}`);
+    warnings.push(`金額がマイナスの明細があります: ${names}`);
   }
 
-  // 2. 同じ日付かつ同じ合計金額のレシートが既に登録されていないか確認
+  // 2. 同じ日付かつ同じ合計金額の領収書が既に登録されていないか確認
   //    合計は receipt.total を優先(無ければ items 合計)
   const newTotal = getReceiptTotal(newReceipt);
   const duplicate = (existingReceipts || []).find(
@@ -55,7 +55,7 @@ export function validateReceipt(newReceipt, existingReceipts) {
   );
   if (duplicate) {
     warnings.push(
-      `同じ日付(${newReceipt.date})・同じ合計金額(${newTotal.toLocaleString()} 円)のレシートが既に登録されています。重複の可能性があります。`
+      `同じ日付(${newReceipt.date})・同じ合計金額(${newTotal.toLocaleString()} 円)の領収書が既に登録されています。重複の可能性があります。`
     );
   }
 

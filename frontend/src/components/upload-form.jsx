@@ -80,7 +80,7 @@ export default function UploadForm({ onParsed }) {
 
   return (
     <div className="upload-form">
-      <h2>レシートをアップロード</h2>
+      <h2>領収書をアップロード</h2>
 
       <input
         id="receipt-file-input"
@@ -92,7 +92,7 @@ export default function UploadForm({ onParsed }) {
 
       {previewUrl && (
         <div className="preview">
-          <img src={previewUrl} alt="レシートのプレビュー" />
+          <img src={previewUrl} alt="領収書のプレビュー" />
         </div>
       )}
 

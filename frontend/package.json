@@ -1,7 +1,7 @@
 {
   "name": "kakeibo-frontend",
   "version": "1.0.0",
-  "description": "レシート家計簿のフロントエンド (React + Vite)",
+  "description": "領収書スキャナー(法人経費精算用)のフロントエンド (React + Vite)",
   "type": "module",
   "scripts": {
     "dev": "vite",
