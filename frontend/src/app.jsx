@@ -7,10 +7,15 @@ import CategoryPieChart from "./components/category-pie-chart.jsx";
 import MonthlyBarChart from "./components/monthly-bar-chart.jsx";
 import { loadReceipts, saveReceipts } from "./utils/storage.js";
 import { detectCategory } from "./utils/category.js";
+import { validateReceipt } from "./utils/validation.js";
 
 export default function App() {
   // レシート一覧の状態
   const [receipts, setReceipts] = useState([]);
+
+  // 検証で警告が出たレシートを一時保留する状態
+  // { receipt: {...}, warnings: ["..."] } もしくは null
+  const [pending, setPending] = useState(null);
 
   // 初回マウント時に localStorage から読み込む
   useEffect(() => {
@@ -22,7 +27,7 @@ export default function App() {
     saveReceipts(receipts);
   }, [receipts]);
 
-  // 解析結果を受け取って一覧に追加する
+  // 解析結果を受け取って一覧に追加する(検証で問題があれば保留して確認する)
   const handleParsed = (parsed) => {
     // 商品ごとにカテゴリを自動判定
     const itemsWithCategory = (parsed.items || []).map((it) => ({
@@ -39,7 +44,28 @@ export default function App() {
       items: itemsWithCategory,
     };
 
-    setReceipts((prev) => [newReceipt, ...prev]);
+    // 検証(マイナス金額・日付と合計の重複)
+    const warnings = validateReceipt(newReceipt, receipts);
+
+    if (warnings.length > 0) {
+      // 警告がある場合は保留して、ユーザーに確認してもらう
+      setPending({ receipt: newReceipt, warnings });
+    } else {
+      // 問題なければそのまま追加
+      setReceipts((prev) => [newReceipt, ...prev]);
+    }
+  };
+
+  // 保留中レシートを「それでも追加する」
+  const confirmPending = () => {
+    if (!pending) return;
+    setReceipts((prev) => [pending.receipt, ...prev]);
+    setPending(null);
+  };
+
+  // 保留中レシートを破棄する
+  const cancelPending = () => {
+    setPending(null);
   };
 
   // レシートを削除する
@@ -64,6 +90,36 @@ export default function App() {
 
       <section className="card">
         <UploadForm onParsed={handleParsed} />
+
+        {pending && (
+          <div className="warning-banner" role="alert">
+            <h3>⚠ 確認してください</h3>
+            <ul>
+              {pending.warnings.map((w, i) => (
+                <li key={i}>{w}</li>
+              ))}
+            </ul>
+            <p className="warning-note">
+              この内容で追加しますか?
+            </p>
+            <div className="warning-actions">
+              <button
+                type="button"
+                className="primary-button"
+                onClick={confirmPending}
+              >
+                それでも追加する
+              </button>
+              <button
+                type="button"
+                className="delete-button"
+                onClick={cancelPending}
+              >
+                キャンセル
+              </button>
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="card">

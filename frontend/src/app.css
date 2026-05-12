@@ -97,6 +97,44 @@ h3 {
   margin-top: 8px;
 }
 
+/* 検証警告バナー */
+.warning-banner {
+  margin-top: 16px;
+  background: #fff7e0;
+  border: 1px solid #f0c060;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.warning-banner h3 {
+  margin: 0 0 8px;
+  color: #a06400;
+  font-size: 15px;
+}
+
+.warning-banner ul {
+  margin: 0 0 8px;
+  padding-left: 20px;
+  color: #5c3b00;
+  font-size: 14px;
+}
+
+.warning-banner li {
+  margin: 4px 0;
+}
+
+.warning-note {
+  margin: 8px 0 12px;
+  color: #5c3b00;
+  font-size: 14px;
+}
+
+.warning-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 /* サマリー */
 .summary {
   display: flex;
